@@ -8,19 +8,53 @@ from datetime import datetime
 class AlphaVantageService:
     """Service for interacting with Alpha Vantage API"""
 
-    BASE_URL = settings.STOCK_API_BASE_URL
-    API_KEY = settings.STOCK_API_KEY
+    def __init__(self):
+        self.base_url = settings.STOCK_API_BASE_URL
+        self.api_key = settings.STOCK_API_KEY
 
-    @staticmethod
-    def get_eps_change(symbol):
+    def get_price_today(self, symbol):
+        """Fetch current stock price from Alpha Vantage"""
+        try:
+            response = requests.get(
+                f"{self.base_url}/query",
+                params={
+                    'function': 'GLOBAL_QUOTE',
+                    'symbol': symbol,
+                    'apikey': self.api_key
+                }
+            )
+            response.raise_for_status()
+            data = response.json()
+            # Extract the price from the response
+            price = data.get('Global Quote', {}).get('05. price')
+            self._save_price_today(symbol, price)
+            return price
+        except requests.RequestException as e:
+            print(f"Alpha Vantage Error: {e}")
+            return None
+        
+    def _save_price_today(self, symbol, currentPrice):
+        """Save current stock price to database"""
+        try:
+            from decimal import Decimal
+            stock = Stock.objects.get(symbol=symbol)
+            if currentPrice:
+                stock.startingPrice = Decimal(currentPrice)
+            stock.save()
+            print(f"Price for stock {symbol} saved successfully")
+        except Stock.DoesNotExist:
+            print(f"Stock {symbol} not found in database")
+            return
+
+    def get_eps_data(self, symbol):
         """Fetch EPS data from external Alpha Vantage and save to database"""
         try:
             response = requests.get(
-                f"{AlphaVantageService.BASE_URL}/query",
+                f"{self.base_url}/query",
                 params={
                     'function': 'EARNINGS',
                     'symbol': symbol,
-                    'apikey': AlphaVantageService.API_KEY
+                    'apikey': self.api_key
                 }
             )
             response.raise_for_status()
@@ -30,15 +64,14 @@ class AlphaVantageService:
             parsed_data = Parser.parse_eps_data(raw_data)
             
             # Save to database
-            AlphaVantageService._save_earnings_to_db(symbol, parsed_data)
+            self._save_earnings_to_db(symbol, parsed_data)
             
             return parsed_data
         except requests.RequestException as e:
             print(f"Alpha Vantage Error: {e}")
             return None
 
-    @staticmethod
-    def _save_earnings_to_db(symbol, parsed_data):
+    def _save_earnings_to_db(self, symbol, parsed_data):
         """Save parsed earnings data to database"""
         try:
             stock = Stock.objects.get(symbol=symbol)
@@ -78,20 +111,35 @@ class AlphaVantageService:
             except Exception as e:
                 print(f"Error saving quarterly earning: {e}")
 
-    @staticmethod
-    def get_price_today(symbol):
-        """Fetch current stock price from Alpha Vantage"""
+    def get_relative_strength_index_data(self, symbol):
+        """Fetch RSI data from Alpha Vantage and save to database"""
         try:
             response = requests.get(
-                f"{AlphaVantageService.BASE_URL}/query",
+                f"{self.base_url}/query",
                 params={
-                    'function': 'GLOBAL_QUOTE',
+                    'function': 'RSI',
                     'symbol': symbol,
-                    'apikey': AlphaVantageService.API_KEY
+                    'interval': 'daily',
+                    'time_period': 14,
+                    'series_type': 'close',
+                    'apikey': self.api_key
                 }
             )
             response.raise_for_status()
-            return response.json()
-        except requests.RequestException as e:
-            print(f"Alpha Vantage Error: {e}")
+            rsi_data = response.json()["Technical Analysis: RSI"]
+            self._save_first_rsi(symbol, rsi_data)
+            return rsi_data
+        except Exception as e:
+            print(f"Error fetching RSI data for: {symbol}, {e}")
             return None
+
+    def _save_first_rsi(self, symbol, rsi_data):
+        """Save the most recent RSI value"""
+        try:
+            stock = Stock.objects.get(symbol=symbol)
+            stock.relativeStrengthIndex = next(iter(rsi_data.values()))["RSI"]
+            stock.save()
+        except Stock.DoesNotExist:
+            print(f"Stock {symbol} not found in database")
+            return
+        print(f"RSI for stock {symbol} saved successfully")

@@ -2,11 +2,14 @@ from django.db import models
 
 class Stock(models.Model):
     name = models.CharField(max_length=255)
-    symbol = models.CharField(max_length=4)
-    startingPrice = models.DecimalField(max_digits=10, decimal_places=2)
+    symbol = models.CharField(max_length=5, unique=True)
+    startingPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     priceWhenBought = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     isBought = models.BooleanField()
     sharesOwned = models.IntegerField()
+    relativeStrengthIndex = models.DecimalField(max_digits=6, decimal_places=4, null=True, blank=True)
+    yoyEPSPercentGrowth = models.DecimalField(max_digits=6, decimal_places=4, null=True, blank=True)
+    compoundedAnnualGrowthRate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return f"{self.symbol} - {self.name}"
