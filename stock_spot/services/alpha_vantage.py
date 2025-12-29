@@ -40,6 +40,7 @@ class AlphaVantageService:
             stock = Stock.objects.get(symbol=symbol)
             if currentPrice:
                 stock.startingPrice = Decimal(currentPrice)
+                stock.currentPrice = Decimal(currentPrice)
             stock.save()
             print(f"Price for stock {symbol} saved successfully")
         except Stock.DoesNotExist:
@@ -120,13 +121,24 @@ class AlphaVantageService:
                     'function': 'RSI',
                     'symbol': symbol,
                     'interval': 'daily',
-                    'time_period': 14,
+                    'time_period': 25,
                     'series_type': 'close',
                     'apikey': self.api_key
                 }
             )
             response.raise_for_status()
-            rsi_data = response.json()["Technical Analysis: RSI"]
+            data = response.json()
+            
+            # Check for API rate limit or error responses
+            if "Technical Analysis: RSI" not in data:
+                error_msg = data.get("Note") or data.get("Information") or data.get("Error Message")
+                if error_msg:
+                    print(f"Alpha Vantage API limit/error for {symbol}: {error_msg}")
+                else:
+                    print(f"Unexpected RSI response for {symbol}: {data}")
+                return None
+            
+            rsi_data = data["Technical Analysis: RSI"]
             self._save_first_rsi(symbol, rsi_data)
             return rsi_data
         except Exception as e:

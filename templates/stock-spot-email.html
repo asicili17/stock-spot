@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Report</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
+    <div style="max-width: 900px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        
+        <!-- Header -->
+        <h1 style="color: #333; text-align: center; margin-bottom: 10px;">Stock Spot Report</h1>
+        <p style="color: #666; text-align: center; margin-bottom: 20px; font-size: 14px;">{{ report_date }}</p>
+        
+        <!-- Stock Table -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+                <tr style="background-color: #2c3e50; color: white;">
+                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd; font-weight: bold;">Symbol</th>
+                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">Current Price</th>
+                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">RSI</th>
+                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">YoY EPS Growth (30-40% or Higher)</th>
+                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">CAGR (25-50% or Higher)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                <tr style="background-color: {% cycle '#ffffff' '#f9f9f9' %}; border: 1px solid #ddd;">
+                    <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #2c3e50;">{{ stock.symbol }}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">${{ stock.startingPrice|default:"N/A" }}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">{{ stock.relativeStrengthIndex|default:"N/A" }}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">{{ stock.yoyEPSPercentGrowth|default:"N/A" }}%</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">{{ stock.compoundedAnnualGrowthRate|default:"N/A" }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Summary -->
+        <div style="background-color: #ecf0f1; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            <p style="margin: 5px 0; color: #2c3e50; font-size: 14px;"><strong>Total Stocks:</strong> {{ stocks|length }}</p>
+        </div>
+        
+        <!-- Footer -->
+        <p style="color: #999; text-align: center; font-size: 12px; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">
+            This is an automated report from Stock Spot. Please do not reply to this email.
+        </p>
+    </div>
+</body>
+</html>

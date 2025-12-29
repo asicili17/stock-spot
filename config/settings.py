@@ -138,3 +138,10 @@ CORS_ALLOWED_ORIGINS = [
 # External API Configuration
 STOCK_API_KEY = os.getenv('STOCK_API_KEY', '')
 STOCK_API_BASE_URL = os.getenv('STOCK_API_BASE_URL', 'https://www.alphavantage.co')
+MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY', '')
+MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN', '')
+MAILGUN_BASE_URL = os.getenv('MAILGUN_API_URL', 'https://api.mailgun.net')
+MAILGUN_FROM_EMAIL = os.getenv('MAILGUN_FROM_EMAIL', '')
+
+# Email Distribution
+EMAIL_DISTRIBUTION_LIST = os.getenv('EMAIL_DISTRIBUTION_LIST', '')
