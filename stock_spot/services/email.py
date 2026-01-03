@@ -1,5 +1,4 @@
 from datetime import date
-import time
 from stock_spot.models import Stock
 from stock_spot.services.stock import StockService
 import requests
@@ -25,7 +24,6 @@ class EmailService:
             stock_service.create_stock(symbol)
             stock = Stock.objects.filter(symbol=symbol).first()
             stocks.append(stock)
-            time.sleep(60)
 
         # Render HTML template
         context = {

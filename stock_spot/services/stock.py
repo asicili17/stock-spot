@@ -1,6 +1,7 @@
 import time
-from stock_spot.models import AnnualEarning, Stock, QuarterlyEarning
+from stock_spot.models import AnnualEarning, AnnualIncomeStatement, QuarterlyIncomeStatement, Stock, QuarterlyEarning
 from stock_spot.services.alpha_vantage import AlphaVantageService
+from stock_spot.services.yfinance import YFinanceService
 
 
 class StockService:
@@ -8,6 +9,7 @@ class StockService:
 
     def __init__(self):
         self.alpha_vantage_service = AlphaVantageService()
+        self.yfinance_service = YFinanceService()
 
     def get_stock_by_symbol(self, symbol):
         """Retrieve stock from database by symbol"""
@@ -36,12 +38,17 @@ class StockService:
             compoundedAnnualGrowthRate=None
         )
         new_stock.save()
+
         # Fetch and save external data (with delays to avoid API rate limiting)
-        self.alpha_vantage_service.get_price_today(symbol)
-        time.sleep(3)  # Alpha Vantage free tier: 5 calls/min, 1 call/second
+        self.yfinance_service.get_stock_info(symbol)
+        self.yfinance_service.get_annual_balance_sheet_data(symbol)
+        self.yfinance_service.get_quarterly_balance_sheet_data(symbol)
+        self.yfinance_service.get_annual_cashflow_data(symbol)
+        self.yfinance_service.get_quarterly_cashflow_data(symbol)
+        self.yfinance_service.get_annual_income_statement_data(symbol)
+        self.yfinance_service.get_quarterly_income_statement_data(symbol)
         self.alpha_vantage_service.get_relative_strength_index_data(symbol)
-        time.sleep(3)  # Alpha Vantage free tier: 5 calls/min, 1 call/second
-        self.alpha_vantage_service.get_eps_data(symbol)
+
         # Calculate metrics
         self.calculate_eps_growth_over_past_year(symbol)
         self.calculate_earnings_CAGR(symbol)
@@ -50,17 +57,17 @@ class StockService:
     def calculate_eps_growth_over_past_year(self, symbol):
         """Calculate year-over-year EPS growth from most recent quarterly earnings"""
         try:
-            mostRecentQuarterlyEarning = QuarterlyEarning.objects.filter(stock__symbol=symbol).order_by('-fiscalDateEnding').first()
-            if not mostRecentQuarterlyEarning or not mostRecentQuarterlyEarning.reportedEPS:
+            mostRecentQuarterlyEarning = QuarterlyIncomeStatement.objects.filter(stock__symbol=symbol).order_by('-fiscalDateEnding').first()
+            if not mostRecentQuarterlyEarning or not mostRecentQuarterlyEarning.dilutedEPS:
                 return None
-            priorYearQuarterlyEarning = QuarterlyEarning.objects.filter(
+            priorYearQuarterlyEarning = QuarterlyIncomeStatement.objects.filter(
                 stock__symbol=symbol,
                 fiscalDateEnding__lte=mostRecentQuarterlyEarning.fiscalDateEnding.replace(year=mostRecentQuarterlyEarning.fiscalDateEnding.year - 1)
             ).order_by('-fiscalDateEnding').first()
-            if not priorYearQuarterlyEarning or not priorYearQuarterlyEarning.reportedEPS:
+            if not priorYearQuarterlyEarning or not priorYearQuarterlyEarning.dilutedEPS:
                 return None
-            mostRecentQuarterlyEPS = mostRecentQuarterlyEarning.reportedEPS
-            priorYearQuarterlyEPS = priorYearQuarterlyEarning.reportedEPS
+            mostRecentQuarterlyEPS = mostRecentQuarterlyEarning.dilutedEPS
+            priorYearQuarterlyEPS = priorYearQuarterlyEarning.dilutedEPS
             yoyEPSGrowth = ((mostRecentQuarterlyEPS-priorYearQuarterlyEPS)/priorYearQuarterlyEPS)*100
             stock = Stock.objects.get(symbol=symbol)
             stock.yoyEPSPercentGrowth = yoyEPSGrowth
@@ -74,33 +81,35 @@ class StockService:
     def calculate_earnings_CAGR(self, symbol):
         """Calculate compounded annual earnings growth rate from 4-5 year interval"""
         try:
-            span = 5
-            annualEarningsDataCount = AnnualEarning.objects.filter(stock__symbol=symbol).count()
+            span = 4
+            annualEarningsDataCount = AnnualIncomeStatement.objects.filter(stock__symbol=symbol).count()
             if(span > annualEarningsDataCount):
                 span = annualEarningsDataCount
-            mostRecentAnnualEarning = AnnualEarning.objects.filter(stock__symbol=symbol).order_by('-fiscalDateEnding').first()
+            mostRecentAnnualEarning = AnnualIncomeStatement.objects.filter(stock__symbol=symbol).order_by('-fiscalDateEnding').first()
             if not mostRecentAnnualEarning:
                 return None
-            nYearsAgoAnnualEarning = AnnualEarning.objects.filter(
+            nYearsAgoAnnualEarning = AnnualIncomeStatement.objects.filter(
                 stock__symbol=symbol,
-                fiscalDateEnding__lte=mostRecentAnnualEarning.fiscalDateEnding.replace(year=mostRecentAnnualEarning.fiscalDateEnding.year - span)
-            ).order_by('-fiscalDateEnding').first()
+                fiscalDateEnding__gte=mostRecentAnnualEarning.fiscalDateEnding.replace(year=mostRecentAnnualEarning.fiscalDateEnding.year - (span-1))
+            ).order_by('-fiscalDateEnding').last()
             if not nYearsAgoAnnualEarning:
                 return None
             
+            print(mostRecentAnnualEarning.dilutedEPS)
+            print(nYearsAgoAnnualEarning.dilutedEPS)
             # Validate EPS values before calculation
-            if not nYearsAgoAnnualEarning.reportedEPS or nYearsAgoAnnualEarning.reportedEPS == 0:
+            if not nYearsAgoAnnualEarning.dilutedEPS or nYearsAgoAnnualEarning.dilutedEPS == 0:
                 print(f"Cannot calculate CAGR for {symbol}: historical EPS is zero or null")
                 return None
-            if not mostRecentAnnualEarning.reportedEPS:
+            if not mostRecentAnnualEarning.dilutedEPS:
                 print(f"Cannot calculate CAGR for {symbol}: recent EPS is null")
                 return None
             # CAGR with negative values requires different handling
-            if nYearsAgoAnnualEarning.reportedEPS < 0 or mostRecentAnnualEarning.reportedEPS < 0:
+            if nYearsAgoAnnualEarning.dilutedEPS < 0 or mostRecentAnnualEarning.dilutedEPS < 0:
                 print(f"Cannot calculate CAGR for {symbol}: negative EPS values present")
                 return None
             
-            cagr = ((float(mostRecentAnnualEarning.reportedEPS/nYearsAgoAnnualEarning.reportedEPS) ** (1/span)) - 1) * 100
+            cagr = ((float(mostRecentAnnualEarning.dilutedEPS/nYearsAgoAnnualEarning.dilutedEPS) ** (1/span)) - 1) * 100
             stock = Stock.objects.get(symbol=symbol)
             stock.compoundedAnnualGrowthRate = cagr
             stock.save()

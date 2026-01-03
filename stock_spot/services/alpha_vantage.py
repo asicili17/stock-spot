@@ -121,7 +121,7 @@ class AlphaVantageService:
                     'function': 'RSI',
                     'symbol': symbol,
                     'interval': 'daily',
-                    'time_period': 25,
+                    'time_period': 14,
                     'series_type': 'close',
                     'apikey': self.api_key
                 }
