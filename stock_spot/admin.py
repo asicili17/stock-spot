@@ -7,8 +7,8 @@ from .models import (
 )
 
 admin.site.register(Stock)
-# admin.site.register(AnnualEarning)
-# admin.site.register(QuarterlyEarning)
+admin.site.register(AnnualEarning)
+admin.site.register(QuarterlyEarning)
 admin.site.register(QuarterlyIncomeStatement)
 admin.site.register(AnnualIncomeStatement)
 admin.site.register(QuarterlyBalanceSheet)

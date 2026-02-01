@@ -1,3 +1,4 @@
+{% load humanize %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,8 +20,11 @@
                     <th style="padding: 12px; text-align: left; border: 1px solid #ddd; font-weight: bold;">Symbol</th>
                     <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">Current Price</th>
                     <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">RSI</th>
-                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">YoY EPS Growth (30-40% or Higher)</th>
-                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">CAGR (25-50% or Higher)</th>
+                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">YoY EPS Growth (+30-40%)</th>
+                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">CAGR (+25-50%)</th>
+                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">Conservative Company Valuation</th>
+                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">Market Cap</th>
+                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">Margin of Safety (+30% - Under Valued, +-10% - Fairly Valued)</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,6 +35,9 @@
                     <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">{{ stock.relativeStrengthIndex|default:"N/A" }}</td>
                     <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">{{ stock.yoyEPSPercentGrowth|default:"N/A" }}%</td>
                     <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">{{ stock.compoundedAnnualGrowthRate|default:"N/A" }}%</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">${{ stock.conservativeCompanyValuation|intcomma|default:"N/A" }}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">${{ stock.marketCap|intcomma|default:"N/A" }}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">{{ stock.margin_of_safety_percentage|intcomma|default:"N/A" }}%</td>
                 </tr>
                 {% endfor %}
             </tbody>

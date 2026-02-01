@@ -102,13 +102,20 @@ class YFinanceService:
             
             stock.name = info.get('shortName') or info.get('longName') or stock.name
             stock.companySummary = info.get('longBusinessSummary') or stock.companySummary
-            price = self._safe_decimal(
+            fetched_price = self._safe_decimal(
                 info.get('currentPrice') or 
                 info.get('regularMarketPrice') or 
                 info.get('previousClose')
-            ) or stock.currentPrice or stock.startingPrice
-            stock.startingPrice = price
-            stock.currentPrice = price
+            )
+            
+            # Only set startingPrice if it's a new stock (no existing startingPrice)
+            if stock.startingPrice is None and fetched_price:
+                stock.startingPrice = fetched_price
+            
+            # Always update currentPrice with latest data
+            stock.currentPrice = fetched_price or stock.currentPrice
+            stock.sharesOutstanding = info.get('sharesOutstanding') or stock.sharesOutstanding
+            stock.marketCap = info.get('marketCap') or stock.marketCap
             stock.save()
             
             return stock
