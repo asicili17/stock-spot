@@ -26,11 +26,8 @@ class StockViewSet(viewsets.ViewSet):
     def create_stock(self, request):
         """Create a new stock with initial data from Alpha Vantage"""
         try:
-            stock = self.stock_service.create_stock(
-                name=request.data.get('name'),
-                symbol=request.data.get('symbol'),
-                is_bought=request.data.get('is_bought'),
-                shares_owned=request.data.get('shares_owned')
+            stock = self.stock_service.create_alphavantage_stock_profile(
+                symbol=request.data.get('symbol')
             )
             serializer = self.get_serializer(stock)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -21,7 +21,7 @@ class EmailService:
         stocks = []
         # Fetch stock data from API and populate stocks list
         for symbol in stock_symbols:
-            stock_service.create_stock(symbol)
+            stock_service.create_alphavantage_stock_profile(symbol)
             stock = Stock.objects.filter(symbol=symbol).first()
             stocks.append(stock)
 

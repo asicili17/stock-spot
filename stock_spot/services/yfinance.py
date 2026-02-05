@@ -2,9 +2,9 @@ import yfinance as yf
 import math
 from stock_spot.models import (
     Stock,
-    QuarterlyIncomeStatement, AnnualIncomeStatement,
-    QuarterlyBalanceSheet, AnnualBalanceSheet,
-    QuarterlyCashFlow, AnnualCashFlow
+    YFQuarterlyIncomeStatement, YFAnnualIncomeStatement,
+    YFQuarterlyBalanceSheet, YFAnnualBalanceSheet,
+    YFQuarterlyCashFlow, YFAnnualCashFlow
 )
 
 
@@ -12,22 +12,22 @@ class YFinanceService:
     """Service for fetching stock data from Yahoo Finance using yfinance library"""
 
     def _safe_value(self, value):
-        """Convert value to int, handling NaN and None"""
+        """Convert value to int, handling NaN and None - defaults to 0"""
         if value is None or (isinstance(value, float) and math.isnan(value)):
-            return None
+            return 0
         try:
             return int(value)
         except (ValueError, TypeError):
-            return None
+            return 0
 
     def _safe_decimal(self, value):
-        """Convert value to float for decimal fields, handling NaN and None"""
+        """Convert value to float for decimal fields, handling NaN and None - defaults to 0"""
         if value is None or (isinstance(value, float) and math.isnan(value)):
-            return None
+            return 0.0
         try:
             return float(value)
         except (ValueError, TypeError):
-            return None
+            return 0.0
 
     def get_annual_income_statement_data(self, symbol):
         try:
@@ -122,6 +122,22 @@ class YFinanceService:
         except Exception as e:
             print(f"YFinance Error fetching stock info for {symbol}: {e}")
             return None
+        
+    def get_latest_stock_based_comp(self, symbol):
+        try:
+            ticker = yf.Ticker(symbol)
+            data = ticker.cash_flow
+            
+            if data is None or data.empty:
+                return None
+            
+            # Get first column (most recent), 'Stock Based Compensation' row
+            stock_based_comp = data.loc['Stock Based Compensation', data.columns[0]]
+            
+            return self._safe_value(stock_based_comp)
+        except Exception as e:
+            print(f"YFinance Error: {e}")
+            return None
 
 
     """Methods to save fetched data to database models"""
@@ -134,7 +150,7 @@ class YFinanceService:
             saved_records = []
             for timestamp, values in data.items():
                 fiscal_date = timestamp.date()
-                record, created = QuarterlyIncomeStatement.objects.update_or_create(
+                record, created = YFQuarterlyIncomeStatement.objects.update_or_create(
                     stock=stock,
                     fiscalDateEnding=fiscal_date,
                     defaults={
@@ -201,7 +217,7 @@ class YFinanceService:
             saved_records = []
             for timestamp, values in data.items():
                 fiscal_date = timestamp.date()
-                record, created = AnnualIncomeStatement.objects.update_or_create(
+                record, created = YFAnnualIncomeStatement.objects.update_or_create(
                     stock=stock,
                     fiscalDateEnding=fiscal_date,
                     defaults={
@@ -269,7 +285,7 @@ class YFinanceService:
             saved_records = []
             for timestamp, values in data.items():
                 fiscal_date = timestamp.date()
-                record, created = QuarterlyBalanceSheet.objects.update_or_create(
+                record, created = YFQuarterlyBalanceSheet.objects.update_or_create(
                     stock=stock,
                     fiscalDateEnding=fiscal_date,
                     defaults={
@@ -368,7 +384,7 @@ class YFinanceService:
             saved_records = []
             for timestamp, values in data.items():
                 fiscal_date = timestamp.date()
-                record, created = AnnualBalanceSheet.objects.update_or_create(
+                record, created = YFAnnualBalanceSheet.objects.update_or_create(
                     stock=stock,
                     fiscalDateEnding=fiscal_date,
                     defaults={
@@ -470,7 +486,7 @@ class YFinanceService:
             saved_records = []
             for timestamp, values in data.items():
                 fiscal_date = timestamp.date()
-                record, created = QuarterlyCashFlow.objects.update_or_create(
+                record, created = YFQuarterlyCashFlow.objects.update_or_create(
                     stock=stock,
                     fiscalDateEnding=fiscal_date,
                     defaults={
@@ -537,7 +553,7 @@ class YFinanceService:
             saved_records = []
             for timestamp, values in data.items():
                 fiscal_date = timestamp.date()
-                record, created = AnnualCashFlow.objects.update_or_create(
+                record, created = YFAnnualCashFlow.objects.update_or_create(
                     stock=stock,
                     fiscalDateEnding=fiscal_date,
                     defaults={
