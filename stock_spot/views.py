@@ -22,6 +22,10 @@ class StockViewSet(viewsets.ViewSet):
         self.stock_service = StockProfileRefreshService()
         self.alpha_vantage_service = AlphaVantageService()
 
+    def get_serializer(self, *args, **kwargs):
+        """Construct the configured serializer for this lightweight ViewSet."""
+        return self.serializer_class(*args, **kwargs)
+
     @action(detail=False, methods=['post'])
     def create_stock(self, request):
         """Create a new stock with initial data from Alpha Vantage"""
