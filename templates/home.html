@@ -4,266 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Spot</title>
-    {% load static %}
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 3rem;
-            font-weight: 400;
-            color: #202124;
-            margin-bottom: 2rem;
-            letter-spacing: -1px;
-        }
-
-        .search-box {
-            width: 100%;
-            margin-bottom: 2rem;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 16px 20px;
-            font-size: 16px;
-            border: 1px solid #dfe1e5;
-            border-radius: 24px;
-            outline: none;
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 6px rgba(32,33,36,.28);
-        }
-
-        input[type="text"]:hover {
-            box-shadow: 0 1px 6px rgba(32,33,36,.4);
-        }
-
-        input[type="text"]:focus {
-            box-shadow: 0 1px 6px rgba(32,33,36,.5);
-            border-color: transparent;
-        }
-
-        input[type="text"]::placeholder {
-            color: #9aa0a6;
-        }
-
-        button {
-            background: #1a73e8;
-            color: white;
-            border: none;
-            padding: 14px 32px;
-            font-size: 16px;
-            border-radius: 24px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 500;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-        }
-
-        button:hover {
-            background: #1557b0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
-
-        button:disabled {
-            background: #dadce0;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .hint {
-            margin-top: 1.5rem;
-            font-size: 14px;
-            color: #5f6368;
-        }
-
-        .message {
-            margin-top: 1.5rem;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .message.success {
-            background: #e6f4ea;
-            color: #137333;
-            border: 1px solid #c6e7d0;
-        }
-
-        .message.error {
-            background: #fce8e6;
-            color: #c5221f;
-            border: 1px solid #f5c6cb;
-        }
-
-        .message.show {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .loader {
-            display: none;
-            margin-top: 1rem;
-        }
-
-        .loader.show {
-            display: block;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #1a73e8;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        :root { --ink:#172033; --muted:#687386; --blue:#2563eb; --blue-dark:#1d4ed8; --line:#dbe2ea; --surface:#fff; --wash:#f5f7fb; }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:linear-gradient(135deg,#eff6ff 0%,#f8fafc 48%,#f0fdf4 100%); }
+        .page { width:min(100% - 40px, 760px); margin:0 auto; padding:clamp(68px,14vh,150px) 0 48px; }
+        .eyebrow { color:var(--blue); font-size:.76rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
+        h1 { margin:12px 0 14px; font-size:clamp(2.5rem,7vw,4.8rem); line-height:.98; letter-spacing:-.065em; }
+        .intro { max-width:575px; margin:0; color:var(--muted); font-size:1.08rem; line-height:1.65; }
+        .entry { display:flex; gap:12px; padding:10px; margin-top:38px; border:1px solid rgba(219,226,234,.9); border-radius:17px; background:rgba(255,255,255,.85); box-shadow:0 18px 45px rgba(30,64,175,.12); }
+        input { min-width:0; flex:1; padding:14px 16px; border:0; outline:0; background:transparent; color:var(--ink); font:inherit; font-size:1rem; }
+        input::placeholder { color:#98a2b3; }
+        button { border:0; border-radius:11px; padding:14px 19px; color:#fff; background:var(--blue); cursor:pointer; font:700 .94rem/1 Inter,ui-sans-serif,system-ui,sans-serif; transition:.18s ease; }
+        button:hover { background:var(--blue-dark); transform:translateY(-1px); } button:disabled { cursor:wait; background:#94a3b8; transform:none; }
+        .note { margin:15px 4px; color:var(--muted); font-size:.9rem; }
+        .message { min-height:22px; margin:18px 4px; color:#b42318; font-size:.92rem; } .message.success { color:#157347; }
+        .modal { position:fixed; inset:0; z-index:10; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(15,23,42,.53); backdrop-filter:blur(5px); }
+        .modal.open { display:flex; } .dialog { width:min(100%,1000px); max-height:calc(100vh - 40px); display:flex; flex-direction:column; overflow:hidden; border-radius:20px; background:var(--surface); box-shadow:0 30px 80px rgba(15,23,42,.35); }
+        .modal-head { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; padding:24px 28px 18px; border-bottom:1px solid var(--line); } .modal-head h2 { margin:3px 0 0; font-size:1.45rem; letter-spacing:-.03em; } .close { flex:0 0 auto; padding:7px 10px; color:var(--muted); background:transparent; font-size:1.5rem; line-height:1; } .close:hover { color:var(--ink); background:#eef2f7; }
+        .report { min-height:230px; overflow:auto; padding:22px 28px; background:var(--wash); } .report > * { max-width:900px!important; box-shadow:none!important; } .report .stock-report-loading { display:grid; min-height:186px; place-items:center; color:var(--muted); font-weight:600; }
+        .send-area { display:flex; align-items:center; gap:12px; padding:18px 28px 24px; border-top:1px solid var(--line); } .send-area label { flex:1; min-width:0; } .send-area input { width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:#fff; } .send-area small { display:block; margin:0 0 5px; color:var(--muted); font-size:.76rem; font-weight:700; }
+        @media (max-width:620px) { .page { width:min(100% - 28px,760px); } .entry,.send-area { flex-direction:column; } .entry button,.send-area button { width:100%; } .modal { padding:10px; } .modal-head,.report,.send-area { padding-left:17px; padding-right:17px; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Stock Spot</h1>
-        
-        <div class="search-box">
-            <input 
-                type="text" 
-                id="symbolsInput" 
-                placeholder="Enter stock symbols (e.g., TSLA, AAPL, MSFT)"
-                autocomplete="off"
-            >
+    <main class="page">
+        <div class="eyebrow">Investment snapshot</div>
+        <h1>Know the numbers<br>before the noise.</h1>
+        <p class="intro">Enter the stocks you want to review. We’ll refresh the data and put the complete report in front of you before you decide whether to email it.</p>
+        <div class="entry">
+            <input id="symbolsInput" type="text" placeholder="TSLA, AAPL, MSFT" autocomplete="off" aria-label="Stock symbols">
+            <button id="previewBtn" type="button">Preview report</button>
         </div>
+        <p class="note">Use commas to add multiple ticker symbols.</p>
+        <div class="message" id="pageMessage" role="status"></div>
+    </main>
 
-        <button id="generateBtn" onclick="generateReport()">Generate Report</button>
-
-        <div class="hint">
-            Enter comma-separated stock symbols to receive a daily report
-        </div>
-
-        <div class="loader" id="loader">
-            <div class="spinner"></div>
-        </div>
-
-        <div class="message" id="message"></div>
+    <div class="modal" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="dialog">
+            <header class="modal-head"><div><div class="eyebrow">Report ready</div><h2 id="modalTitle">Your stock report</h2></div><button class="close" id="closeModal" type="button" aria-label="Close report">×</button></header>
+            <div class="report" id="reportContent"><div class="stock-report-loading">Preparing your report…</div></div>
+            <form class="send-area" id="sendForm">
+                <label for="emailInput"><small>Email a copy to yourself</small><input id="emailInput" type="email" placeholder="you@example.com" required></label>
+                <button id="sendBtn" type="submit">Send email</button>
+            </form>
+        </section>
     </div>
 
     <script>
-        const input = document.getElementById('symbolsInput');
-        const button = document.getElementById('generateBtn');
-        const loader = document.getElementById('loader');
-        const message = document.getElementById('message');
+        const symbolsInput = document.getElementById('symbolsInput');
+        const previewBtn = document.getElementById('previewBtn');
+        const pageMessage = document.getElementById('pageMessage');
+        const modal = document.getElementById('reportModal');
+        const reportContent = document.getElementById('reportContent');
+        const sendForm = document.getElementById('sendForm');
+        const emailInput = document.getElementById('emailInput');
+        const sendBtn = document.getElementById('sendBtn');
+        let reportSymbols = [];
 
-        // Get CSRF token from cookie
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
+        function setMessage(text = '', success = false) { pageMessage.textContent = text; pageMessage.className = `message${success ? ' success' : ''}`; }
+        function setPreviewLoading(loading) { previewBtn.disabled = loading; previewBtn.textContent = loading ? 'Loading report…' : 'Preview report'; }
+        function openModal() { modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        function closeModal() { modal.classList.remove('open'); document.body.style.overflow = ''; }
+        async function request(url, payload) { const response = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Something went wrong.'); return data; }
+
+        async function previewReport() {
+            const symbols = symbolsInput.value.trim();
+            if (!symbols) { setMessage('Enter at least one stock symbol to continue.'); return; }
+            setMessage(); setPreviewLoading(true); reportContent.innerHTML = '<div class="stock-report-loading">Refreshing market data and preparing your report…</div>'; openModal();
+            try { const data = await request('/api/stocks/api/report/preview/', {symbols}); reportSymbols = data.symbols; reportContent.innerHTML = data.report_html; emailInput.focus(); }
+            catch (error) { closeModal(); setMessage(error.message); }
+            finally { setPreviewLoading(false); }
         }
-
-        // Allow Enter key to submit
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                generateReport();
-            }
-        });
-
-        async function generateReport() {
-            const symbols = input.value.trim();
-            
-            if (!symbols) {
-                showMessage('Please enter at least one stock symbol', 'error');
-                return;
-            }
-
-            // Disable button and show loader
-            button.disabled = true;
-            button.textContent = 'Generating...';
-            loader.classList.add('show');
-            message.classList.remove('show');
-
-            try {
-                const csrftoken = getCookie('csrftoken');
-                const response = await fetch('/api/stocks/api/report/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken,
-                    },
-                    body: JSON.stringify({ symbols: symbols })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage(`Report sent successfully for: ${data.symbols.join(', ')}`, 'success');
-                    input.value = ''; // Clear input on success
-                } else {
-                    showMessage(data.error || 'Failed to generate report', 'error');
-                }
-            } catch (error) {
-                showMessage('Network error. Please try again.', 'error');
-                console.error('Error:', error);
-            } finally {
-                // Re-enable button and hide loader
-                button.disabled = false;
-                button.textContent = 'Generate Report';
-                loader.classList.remove('show');
-            }
+        async function sendEmail(event) {
+            event.preventDefault(); if (!reportSymbols.length) return;
+            sendBtn.disabled = true; sendBtn.textContent = 'Sending…';
+            try { await request('/api/stocks/api/report/send/', {symbols:reportSymbols, email:emailInput.value}); closeModal(); setMessage('Your report is on its way to ' + emailInput.value + '.', true); }
+            catch (error) { setMessage(error.message); }
+            finally { sendBtn.disabled = false; sendBtn.textContent = 'Send email'; }
         }
-
-        function showMessage(text, type) {
-            message.textContent = text;
-            message.className = `message ${type} show`;
-        }
+        previewBtn.addEventListener('click', previewReport);
+        symbolsInput.addEventListener('keydown', event => { if (event.key === 'Enter') previewReport(); });
+        sendForm.addEventListener('submit', sendEmail);
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        modal.addEventListener('click', event => { if (event.target === modal) closeModal(); });
+        document.addEventListener('keydown', event => { if (event.key === 'Escape') closeModal(); });
     </script>
 </body>
 </html>

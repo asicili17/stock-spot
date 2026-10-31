@@ -1,5 +1,13 @@
 # Stock model
 from .stock import Stock
+from .market_data import (
+    AlphaVantageFetch,
+    DailyPrice,
+    FundamentalSnapshot,
+    FreeCashFlowYieldSignal,
+    MomentumBacktestRun,
+    ShareCountObservation,
+)
 
 # Alpha Vantage models (earnings data and financial statements)
 from .alpha_vantage import (
@@ -26,6 +34,12 @@ from .yfinance import (
 __all__ = [
     # Stock
     'Stock',
+    'DailyPrice',
+    'AlphaVantageFetch',
+    'FundamentalSnapshot',
+    'ShareCountObservation',
+    'FreeCashFlowYieldSignal',
+    'MomentumBacktestRun',
     # Alpha Vantage
     'AnnualEarning',
     'QuarterlyEarning',

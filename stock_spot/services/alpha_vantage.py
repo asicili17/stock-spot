@@ -114,7 +114,8 @@ class AlphaVantageService:
         try:
             response = requests.get(
                 f"{self.base_url}/query",
-                params={**params, 'apikey': self.api_key}
+                params={**params, 'apikey': self.api_key},
+                timeout=30,
             )
             response.raise_for_status()
             data = response.json()
@@ -296,33 +297,3 @@ class AlphaVantageService:
         except (AlphaVantageError, StockNotFoundError) as e:
             logger.error(f"Failed to get cash flow for {symbol}: {e}")
             raise
-
-    # ==================== RSI ====================
-
-    def get_relative_strength_index_data(self, symbol: str) -> dict:
-        """Fetch RSI data from Alpha Vantage and save to database"""
-        try:
-            data = self._make_api_request({
-                'function': 'RSI',
-                'symbol': symbol,
-                'interval': 'daily',
-                'time_period': 14,
-                'series_type': 'close',
-            })
-
-            if "Technical Analysis: RSI" not in data:
-                raise AlphaVantageError(f"Unexpected RSI response format for {symbol}")
-
-            rsi_data = data["Technical Analysis: RSI"]
-            self._save_first_rsi(symbol, rsi_data)
-            return rsi_data
-        except (AlphaVantageError, StockNotFoundError) as e:
-            logger.error(f"Failed to get RSI for {symbol}: {e}")
-            raise
-
-    def _save_first_rsi(self, symbol: str, rsi_data: dict):
-        """Save the most recent RSI value"""
-        stock = self._get_stock(symbol)
-        stock.relativeStrengthIndex = next(iter(rsi_data.values()))["RSI"]
-        stock.save()
-        logger.info(f"Saved RSI for {symbol}")

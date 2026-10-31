@@ -14,7 +14,6 @@ class Stock(models.Model):
     priceWhenBought = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     isBought = models.BooleanField(null=True, blank=True)
     sharesOwned = models.IntegerField(null=True, blank=True)
-    relativeStrengthIndex = models.DecimalField(max_digits=6, decimal_places=4, null=True, blank=True)
     yoyEPSPercentGrowth = models.DecimalField(max_digits=7, decimal_places=4, null=True, blank=True)
     compoundedAnnualGrowthRate = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
 

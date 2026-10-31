@@ -5,6 +5,8 @@ from .models import (
     QuarterlyIncomeStatement, AnnualIncomeStatement,
     QuarterlyBalanceSheet, AnnualBalanceSheet,
     QuarterlyCashFlow, AnnualCashFlow,
+    DailyPrice, AlphaVantageFetch, FundamentalSnapshot, FreeCashFlowYieldSignal,
+    MomentumBacktestRun, ShareCountObservation,
     # YFinance financial statements
     YFQuarterlyIncomeStatement, YFAnnualIncomeStatement,
     YFQuarterlyBalanceSheet, YFAnnualBalanceSheet,
@@ -21,6 +23,12 @@ admin.site.register(QuarterlyBalanceSheet)
 admin.site.register(AnnualBalanceSheet)
 admin.site.register(QuarterlyCashFlow)
 admin.site.register(AnnualCashFlow)
+admin.site.register(DailyPrice)
+admin.site.register(AlphaVantageFetch)
+admin.site.register(FundamentalSnapshot)
+admin.site.register(ShareCountObservation)
+admin.site.register(FreeCashFlowYieldSignal)
+admin.site.register(MomentumBacktestRun)
 # YFinance
 admin.site.register(YFQuarterlyIncomeStatement)
 admin.site.register(YFAnnualIncomeStatement)

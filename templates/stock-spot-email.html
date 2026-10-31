@@ -19,7 +19,6 @@
                 <tr style="background-color: #2c3e50; color: white;">
                     <th style="padding: 12px; text-align: left; border: 1px solid #ddd; font-weight: bold;">Symbol</th>
                     <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">Current Price</th>
-                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">RSI</th>
                     <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">YoY EPS Growth (+30-40%)</th>
                     <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">CAGR (+25-50%)</th>
                     <th style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">Conservative Company Valuation</th>
@@ -32,7 +31,6 @@
                 <tr style="background-color: {% cycle '#ffffff' '#f9f9f9' %}; border: 1px solid #ddd;">
                     <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #2c3e50;">{{ stock.symbol }}</td>
                     <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">${{ stock.startingPrice|default:"N/A" }}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">{{ stock.relativeStrengthIndex|default:"N/A" }}</td>
                     <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">{{ stock.yoyEPSPercentGrowth|default:"N/A" }}%</td>
                     <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">{{ stock.compoundedAnnualGrowthRate|default:"N/A" }}%</td>
                     <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #333;">${{ stock.conservativeCompanyValuation|intcomma|default:"N/A" }}</td>
