@@ -2,6 +2,13 @@
 
 This is a Django project configured for development.
 
+## Documentation
+
+- [Application architecture](docs/application-architecture.md)
+- [Research workflow](docs/research-workflow.md)
+- [Developer guide](docs/developer-guide.md)
+- [Contributor maintenance rules](AGENTS.md)
+
 ## Setup Instructions
 
 ### 1. Create Virtual Environment
