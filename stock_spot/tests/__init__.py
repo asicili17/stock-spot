@@ -1,0 +1,1 @@
+"""Stock Spot test package."""
